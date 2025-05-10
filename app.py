@@ -18,20 +18,19 @@ def validate_college_data(college):
         "recruiters": str,
         "admission_chance": str
     }
-    
+
     valid_ratings = {"A++", "A+", "A", "B++", "B+", "B"}
-    
-    # Check all fields exist and have correct types
+
+    # Ensure required fields are present
     for field, field_type in required_fields.items():
         if field not in college:
             raise ValueError(f"Missing field: {field}")
         college[field] = str(college[field])
-    
-    # Validate rating
+
+    # Validate values
     if college["rating"] not in valid_ratings:
         raise ValueError(f"Invalid rating: {college['rating']}")
-    
-    # Validate numeric fields
+
     try:
         float(college["prev_cutoff"])
         float(college["expected_cutoff"])
@@ -42,7 +41,7 @@ def validate_college_data(college):
             raise ValueError("Admission chance must be between 0 and 100")
     except ValueError as e:
         raise ValueError(f"Invalid numeric value: {str(e)}")
-    
+
     return college
 
 @app.route('/', methods=['GET', 'POST'])
@@ -54,43 +53,39 @@ def index():
             field = request.form['field']
             community = request.form['community']
 
-            prompt = f"""Analyze colleges in Tamil Nadu for:
-            - Cutoff marks: {cutoff}
-            - Field: {field}
-            - Community: {community}
+            prompt = f"""
+Return a JSON array of exactly 10 colleges in Tamil Nadu that match the following:
+- Cutoff marks: {cutoff}
+- Field: {field}
+- Community: {community}
 
-            Return exactly 10 colleges in this JSON format (no additional text):
-            [
-                {{
-                    "name": "College Name",
-                    "location": "City, District",
-                    "prev_cutoff": "185.5",
-                    "expected_cutoff": "186.0",
-                    "seats": "60",
-                    "rating": "A",
-                    "recruiters": "120",
-                    "admission_chance": "75"
-                }}
-            ]
+Format:
+[
+    {{
+        "name": "College Name",
+        "location": "City, District",
+        "prev_cutoff": "185.5",
+        "expected_cutoff": "186.0",
+        "seats": "60",
+        "rating": "A",
+        "recruiters": "120",
+        "admission_chance": "75"
+    }}
+]
 
-            Rules:
-            - Return exactly 10 colleges sorted by admission chance (highest to lowest)
-            - location should be city and district
-            - prev_cutoff and expected_cutoff should be numbers with one decimal
-            - seats should be a number
-            - rating MUST be one of: A++, A+, A, B++, B+, B
-            - recruiters should be number of companies visited for placement
-            - admission_chance should be a number between 0-100
-            - All values must be strings
-            - Ensure proper JSON formatting
-            - Return only the JSON array, no other text"""
+Rules:
+- Return exactly 10 colleges sorted by admission_chance (high to low)
+- All values must be strings
+- rating must be one of: A++, A+, A, B++, B+, B
+- Return only valid JSON. No markdown or explanation.
+"""
 
             response = client.chat.completions.create(
                 model="llama3-70b-8192",
                 messages=[
                     {
-                        "role": "system", 
-                        "content": "You are a JSON-only response generator. Return valid JSON arrays without any additional text or formatting."
+                        "role": "system",
+                        "content": "You are a JSON-only generator. Respond with clean JSON only, no markdown or extra characters."
                     },
                     {
                         "role": "user",
@@ -100,29 +95,24 @@ def index():
                 temperature=0.5,
                 max_tokens=1600
             )
-            
-            # Clean and parse response
+
             response_text = response.choices[0].message.content.strip()
-            
-            # Remove any markdown or extra formatting
-            if "```" in response_text:
-                response_text = response_text.split("```")[1]
-                if response_text.startswith("json"):
-                    response_text = response_text[4:]
-                response_text = response_text.strip()
-            
-            # Parse JSON and validate structure
-            colleges = json.loads(response_text)
-            
-            # Validate list length
-            if not isinstance(colleges, list) or len(colleges) != 10:
+
+            # Strip any code block markers
+            if response_text.startswith("```"):
+                response_text = response_text.strip("`")
+                if response_text.lower().startswith("json"):
+                    response_text = response_text[4:].strip()
+
+            colleges_raw = json.loads(response_text)
+
+            if not isinstance(colleges_raw, list) or len(colleges_raw) != 10:
                 raise ValueError("Response must contain exactly 10 colleges")
-            
-            # Validate each college entry
-            colleges = [validate_college_data(college) for college in colleges]
-            
-        except json.JSONDecodeError as e:
-            print(f"JSON Error: {response_text}")  # For debugging
+
+            colleges = [validate_college_data(college) for college in colleges_raw]
+
+        except json.JSONDecodeError:
+            print(f"JSON Error: {response_text}")
             colleges = [{
                 "name": "Error: Invalid JSON format",
                 "location": "-",
@@ -134,7 +124,7 @@ def index():
                 "admission_chance": "0"
             }]
         except Exception as e:
-            print(f"Error: {str(e)}")  # For debugging
+            print(f"Error: {str(e)}")
             colleges = [{
                 "name": f"Error: {str(e)}",
                 "location": "-",
