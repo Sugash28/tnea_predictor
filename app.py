@@ -60,7 +60,7 @@ def index():
                     }
                 ],
                 temperature=0.5,  # Lower temperature for more consistent output
-                max_tokens=1200
+                max_tokens=1600
             )
             
             # Clean and parse response
