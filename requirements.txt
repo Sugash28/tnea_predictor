@@ -1,0 +1,5 @@
+Flask
+groq
+python-dotenv
+Werkzeug
+Jinja2
