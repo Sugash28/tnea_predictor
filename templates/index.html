@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TNEA College Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #3b82f6;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background-color);
+            padding: 2rem;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        form {
+            background: var(--card-background);
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 3rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .colleges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin: 0 auto;
+        }
+
+        .college-card {
+            background: var(--card-background);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .college-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        .college-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-item {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: #f1f5f9;
+        }
+
+        .stat-item.highlight {
+            background: #eff6ff;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .stat-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .probability-bar {
+            margin-top: 0.75rem;
+            height: 2rem;
+            background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+            border-radius: 0.5rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .rating-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .colleges-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+        college-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    .college-location {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .location-icon {
+        width: 16px;
+        height: 16px;
+        fill: var(--text-secondary);
+    }
+
+    .recruiter-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        background: #ecfdf5;
+        color: #059669;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>TNEA College Predictor</h1>
+            <p>Find the best engineering colleges based on your cutoff marks</p>
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <label>Cutoff Marks</label>
+                <input type="number" step="0.1" name="cutoff" required min="0" max="200" placeholder="Enter your cutoff marks">
+            </div>
+
+            <div class="form-group">
+                <label>Field of Study</label>
+                <input type="text" name="field" required placeholder="e.g., Computer Science">
+            </div>
+
+            <div class="form-group">
+                <label>Community</label>
+                <select name="community" required>
+                    <option value="" disabled selected>Select your community</option>
+                    <option value="OC">OC</option>
+                    <option value="BC">BC</option>
+                    <option value="MBC">MBC</option>
+                    <option value="SC">SC</option>
+                    <option value="ST">ST</option>
+                </select>
+            </div>
+
+            <button type="submit">Get College Predictions</button>
+        </form>
+
+       {% for college in colleges %}
+<div class="college-card">
+    <div class="college-header">
+        <div class="college-name">{{ college.name }}</div>
+        <div class="college-location">
+            <svg class="location-icon" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            {{ college.location }}
+        </div>
+        <div class="recruiter-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+                <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10z"/>
+            </svg>
+            {{ college.recruiters }} Recruiters
+        </div>
+    </div>
+    <div class="stat-grid">
+        <div class="stat-item">
+            <div class="stat-label">2024 Cutoff</div>
+            <div class="stat-value">{{ college.prev_cutoff }}</div>
+        </div>
+        <div class="stat-item highlight">
+            <div class="stat-label">Expected 2025 Cutoff</div>
+            <div class="stat-value">{{ college.expected_cutoff }}</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Available Seats</div>
+            <div class="stat-value">{{ college.seats }}</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">NAAC Rating</div>
+            <div class="stat-value">
+                <span class="rating-badge">{{ college.rating }}</span>
+            </div>
+        </div>
+        <div class="stat-item full-width">
+            <div class="stat-label">Admission Probability</div>
+            <div class="probability-bar" style="width: {{ college.admission_chance }}%">
+                {{ college.admission_chance }}%
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% if colleges %}
+</div>
+{% endif %}
+</div>
+</body>
+</html>
